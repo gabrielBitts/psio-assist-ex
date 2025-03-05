@@ -9,3 +9,5 @@ Makefile.Release
 Makefile.Debug
 *.pro.user
 *.pro.user.*
+Output
+setup.iss
