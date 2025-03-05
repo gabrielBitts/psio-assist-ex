@@ -5,15 +5,17 @@
 
 class BinFile {
 public:
-    BinFile(const std::string& fileName, const std::string& filePath)
-        : fileName(fileName), filePath(filePath) {}
+    BinFile(const std::string& fileName, const std::string& filePath);
 
-    std::string getFileName() const { return fileName; }
-    std::string getFilePath() const { return filePath; }
+    std::string getFileName() const;
+    std::string getFilePath() const;
+
+    void setFileName(const std::string& fileName);
+    void setFilePath(const std::string& filePath);
 
 private:
     std::string fileName;
     std::string filePath;
 };
 
-#endif // BINFILE_H 
+#endif // BINFILE_H

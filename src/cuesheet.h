@@ -37,4 +37,4 @@ private:
     std::vector<BinFile> binFiles;
 };
 
-#endif // CUESHEET_H 
+#endif // CUESHEET_H

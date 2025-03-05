@@ -1,9 +1,7 @@
 #include "binfile.h"
 
 BinFile::BinFile(const std::string& fileName, const std::string& filePath)
-    : fileName(fileName)
-    , filePath(filePath)
-{
+    : fileName(fileName), filePath(filePath) {
 }
 
 std::string BinFile::getFileName() const {
@@ -20,4 +18,4 @@ void BinFile::setFileName(const std::string& fileName) {
 
 void BinFile::setFilePath(const std::string& filePath) {
     this->filePath = filePath;
-} 
+}

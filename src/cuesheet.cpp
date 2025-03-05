@@ -1,10 +1,8 @@
 #include "cuesheet.h"
 
 CueSheet::CueSheet(const std::string& fileName, const std::string& filePath, const std::string& gameName)
-    : fileName(fileName)
-    , filePath(filePath)
-    , gameName(gameName)
-{
+    : fileName(fileName), filePath(filePath), gameName(gameName) {
+    // Implementação do construtor
 }
 
 std::string CueSheet::getFileName() const {
@@ -45,4 +43,4 @@ size_t CueSheet::getBinFileCount() const {
 
 void CueSheet::clearBinFiles() {
     binFiles.clear();
-} 
+}

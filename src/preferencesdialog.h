@@ -2,41 +2,27 @@
 #define PREFERENCESDIALOG_H
 
 #include <QDialog>
-#include <QVBoxLayout>
-#include <QFormLayout>
+#include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QDialogButtonBox>
 
 class PreferencesDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit PreferencesDialog(QWidget* parent = nullptr)
-        : QDialog(parent)
-    {
-        setWindowTitle("Preferências");
-        setupUI();
-    }
-
-    ~PreferencesDialog() = default;
+    explicit PreferencesDialog(QWidget* parent = nullptr);
+    ~PreferencesDialog() override = default;
 
 private:
-    void setupUI() {
-        auto* layout = new QVBoxLayout(this);
-        auto* formLayout = new QFormLayout;
-        
-        // Adicionar campos de preferências aqui quando necessário
-        
-        auto* buttonBox = new QDialogButtonBox(
-            QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-        
-        connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-        connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
-        
-        layout->addLayout(formLayout);
-        layout->addWidget(buttonBox);
-    }
+    void setupUI();
+    void loadSettings();
+    void saveSettings();
+    void selectBackupDir();
+
+    QCheckBox* autoFixCueBox;
+    QCheckBox* createBackupsBox;
+    QLineEdit* backupDirEdit;
+    QPushButton* backupDirButton;
 };
 
-#endif // PREFERENCESDIALOG_H 
+#endif // PREFERENCESDIALOG_H

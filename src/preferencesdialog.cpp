@@ -1,8 +1,13 @@
 #include "preferencesdialog.h"
+#include "config.h" // Certifique-se de incluir o cabeçalho da classe Config
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QDialogButtonBox>
 #include <QFileDialog>
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QHBoxLayout>
 
 PreferencesDialog::PreferencesDialog(QWidget *parent) 
     : QDialog(parent)
@@ -15,8 +20,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     setupUI();
     loadSettings();
 }
-
-PreferencesDialog::~PreferencesDialog() = default;
 
 void PreferencesDialog::saveSettings() {
     Config::getInstance().autoFixCue = autoFixCueBox->isChecked();
@@ -73,4 +76,4 @@ void PreferencesDialog::loadSettings() {
     autoFixCueBox->setChecked(config.autoFixCue);
     createBackupsBox->setChecked(config.createBackups);
     backupDirEdit->setText(config.backupDirectory);
-} 
+}

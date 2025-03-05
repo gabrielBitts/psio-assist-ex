@@ -1,3 +1,11 @@
 build
 psio-assist
 covers.db
+release
+.vs
+.qmake.stash
+Makefile
+Makefile.Release
+Makefile.Debug
+*.pro.user
+*.pro.user.*

@@ -51,4 +51,4 @@ private:
     QNetworkAccessManager networkManager;
 };
 
-#endif // DATABASE_H 
+#endif // DATABASE_H

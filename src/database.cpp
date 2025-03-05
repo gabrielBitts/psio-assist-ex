@@ -27,6 +27,7 @@ Database::~Database() {
     if (db.isOpen()) {
         db.close();
     }
+    QSqlDatabase::removeDatabase(connection); // Adicione esta linha para remover a conexão
 }
 
 bool Database::init() {
@@ -514,4 +515,4 @@ QString Database::getGameTitle(const QString& gameId) {
     return QString();
 }
 
-// ... outros métodos serão implementados conforme necessário ... 
+// ... outros métodos serão implementados conforme necessário ...
