@@ -10,10 +10,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Encontrar os pacotes Qt necessários
+# Find Qt6 packages
 find_package(Qt6 COMPONENTS Core Gui Widgets Sql Network REQUIRED)
 
-# Adicionar os arquivos fonte
+# Add source files
 add_executable(psio-assist
     src/main.cpp
     src/mainwindow.cpp
@@ -28,9 +28,11 @@ add_executable(psio-assist
     src/config.h
     src/binfile.h
     src/preferencesdialog.h
+    src/preferencesdialog.cpp
+    src/binfile.cpp
 )
 
-# Linkar com as bibliotecas Qt necessárias
+# Link with Qt6 libraries
 target_link_libraries(psio-assist PRIVATE
     Qt6::Core
     Qt6::Gui
