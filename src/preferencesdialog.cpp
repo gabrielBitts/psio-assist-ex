@@ -1,5 +1,5 @@
 #include "preferencesdialog.h"
-#include "config.h" // Certifique-se de incluir o cabeçalho da classe Config
+#include "config.h" // Make sure to include the Config class header
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QDialogButtonBox>
@@ -60,7 +60,7 @@ void PreferencesDialog::setupUI() {
 
     layout->addLayout(formLayout);
 
-    // Botões
+    // Buttons
     auto *buttonBox = new QDialogButtonBox(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
         Qt::Horizontal, this);

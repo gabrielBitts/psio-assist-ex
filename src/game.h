@@ -37,7 +37,7 @@ public:
     void setCoverArt(bool has);
     void setCu2Present(bool present);
 
-    // Adicionar ao cabeçalho da classe Game
+    // Add to Game class header
     bool isRelatedDisc(const Game& other) const;
     std::string getBaseGameName() const;
     int extractDiscNumber() const;

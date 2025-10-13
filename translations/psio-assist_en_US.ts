@@ -277,5 +277,37 @@
         <source>PSIO Assistant v1.0\n\nA tool for managing PlayStation games for PSIO.\n\nDeveloped with Qt 6</source>
         <translation>PSIO Assistant v1.0\n\nA tool for managing PlayStation games for PSIO.\n\nDeveloped with Qt 6</translation>
     </message>
+    <message>
+        <source>Game Details</source>
+        <translation>Game Details</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>Error opening file!</source>
+        <translation>Error opening file!</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Warning</translation>
+    </message>
+    <message>
+        <source>No games to verify!</source>
+        <translation>No games to verify!</translation>
+    </message>
+    <message>
+        <source>No games for backup!</source>
+        <translation>No games for backup!</translation>
+    </message>
+    <message>
+        <source>No games to process!</source>
+        <translation>No games to process!</translation>
+    </message>
+    <message>
+        <source>%1 CUE file(s) fixed</source>
+        <translation>%1 CUE file(s) fixed</translation>
+    </message>
 </context>
 </TS>

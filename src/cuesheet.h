@@ -7,7 +7,7 @@
 
 class CueSheet {
 public:
-    // Construtor padrão
+    // Default constructor
     CueSheet() : fileName(""), filePath(""), gameName("") {}
     
     // Construtor existente

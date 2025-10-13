@@ -20,19 +20,19 @@ public:
         QDataStream stream(&file);
         stream.setByteOrder(QDataStream::LittleEndian);
 
-        // Cabeçalho CU2
+        // CU2 header
         stream << (quint32)0x32554323;  // Magic number "CU2"
         stream << (quint32)0x00000001;  // Version
 
-        // Informações do jogo
+        // Game information
         QString gameId = QString::fromStdString(game.getId());
         stream.writeRawData(gameId.toLatin1().constData(), 10);
 
-        // Número de tracks
+        // Number of tracks
         quint32 numTracks = game.getCueSheet().getBinFileCount();
         stream << numTracks;
 
-        // Informações das tracks
+        // Track information
         for (const auto& binFile : game.getCueSheet().getBinFiles()) {
             QString binName = QString::fromStdString(binFile.getFileName());
             stream.writeRawData(binName.toLatin1().constData(), 32);

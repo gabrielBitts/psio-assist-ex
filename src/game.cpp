@@ -91,7 +91,7 @@ bool Game::isRelatedDisc(const Game& other) const {
     QString thisName = QString::fromStdString(directoryName);
     QString otherName = QString::fromStdString(other.directoryName);
     
-    // Remove "(Disc X)" ou "DiscX" do nome para comparação
+    // Remove "(Disc X)" or "DiscX" from name for comparison
     QString baseNamePattern1 = R"(\s*\(Disc\s*\d+\))";
     QString baseNamePattern2 = R"(\s*Disc\s*\d+)";
     
@@ -114,11 +114,11 @@ std::string Game::getBaseGameName() const {
 }
 
 int Game::extractDiscNumber() const {
-    // Procurar por padrões como "Disc 1", "Disc 2", etc.
+    // Search for patterns like "Disc 1", "Disc 2", etc.
     std::string name = directoryName;
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     
-    // Padrões comuns para números de disco
+    // Common patterns for disc numbers
     std::vector<std::string> patterns = {
         "disc", "disk", "cd", "vol"
     };
@@ -126,7 +126,7 @@ int Game::extractDiscNumber() const {
     for (const auto& pattern : patterns) {
         size_t pos = name.find(pattern);
         if (pos != std::string::npos) {
-            // Procurar por um número após o padrão
+            // Search for a number after the pattern
             pos += pattern.length();
             while (pos < name.length() && (name[pos] == ' ' || name[pos] == '_' || name[pos] == '-')) {
                 pos++;
@@ -138,11 +138,11 @@ int Game::extractDiscNumber() const {
         }
     }
     
-    // Se não encontrou um padrão claro, verificar se termina com um número
+    // If no clear pattern found, check if it ends with a number
     if (!name.empty() && isdigit(name.back())) {
         return name.back() - '0';
     }
     
-    // Padrão não encontrado, assumir disco 1
+    // Pattern not found, assume disc 1
     return 1;
 } 
