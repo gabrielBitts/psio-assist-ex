@@ -6,7 +6,7 @@ Works on **Linux, macOS, and Windows**.
 
 ---
 
-![image](https://github.com/user-attachments/assets/3702df62-7b1a-4af7-ac10-02ed044db05c)
+![image](./PSIO%20Assist%20EX.png)
 
 
 ---
