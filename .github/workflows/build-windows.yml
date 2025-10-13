@@ -1,0 +1,67 @@
+name: Build Windows Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.0'
+        modules: 'qtbase qttools qttranslations'
+        cached: 'true'
+    
+    - name: Setup CMake
+      uses: lukka/run-cmake@v4
+      with:
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        buildDirectory: '${{ github.workspace }}/build'
+        buildType: 'Release'
+    
+    - name: Build Application
+      run: |
+        cd build
+        cmake --build . --config Release
+    
+    - name: Create Windows Package
+      run: |
+        mkdir -p dist/PSIO-Assist-EX
+        copy build\Release\psio-assist.exe dist\PSIO-Assist-EX\
+        copy translations\*.qm dist\PSIO-Assist-EX\translations\
+        copy README.md dist\PSIO-Assist-EX\
+        copy LICENSE dist\PSIO-Assist-EX\
+    
+    - name: Download NSIS
+      run: |
+        Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/4/4a/NSIS_3.08_setup.exe" -OutFile "nsis-installer.exe"
+        Start-Process -FilePath "nsis-installer.exe" -ArgumentList "/S" -Wait
+    
+    - name: Create Installer
+      run: |
+        "C:\Program Files (x86)\NSIS\makensis.exe" installer\psio-assist-installer.nsi
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-installer
+        path: |
+          PSIO-Assist-EX-Installer.exe
+          dist/PSIO-Assist-EX/
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          PSIO-Assist-EX-Installer.exe
+        draft: false
+        prerelease: false
