@@ -15,7 +15,6 @@
 RequestExecutionLevel admin
 InstallDir "$PROGRAMFILES\${APPNAME}"
 Name "${APPNAME}"
-Icon "icon.ico"
 outFile "PSIO-Assist-EX-Installer.exe"
 
 !include LogicLib.nsh
@@ -42,10 +41,20 @@ section "install"
     setOutPath $INSTDIR
     
     ; Copy application files
-    file "psio-assist.exe"
-    file "translations\*.qm"
-    file "README.md"
-    file "LICENSE"
+    file "dist\PSIO-Assist-EX\psio-assist.exe"
+    file "dist\PSIO-Assist-EX\README.md"
+    file "dist\PSIO-Assist-EX\LICENSE"
+    
+    ; Copy Qt DLLs and dependencies
+    file "dist\PSIO-Assist-EX\*.dll"
+    file "dist\PSIO-Assist-EX\platforms\*"
+    file "dist\PSIO-Assist-EX\styles\*"
+    file "dist\PSIO-Assist-EX\imageformats\*"
+    
+    ; Copy translations
+    setOutPath "$INSTDIR\translations"
+    file "dist\PSIO-Assist-EX\translations\*.qm"
+    setOutPath $INSTDIR
     
     ; Create uninstaller
     writeUninstaller "$INSTDIR\uninstall.exe"
@@ -78,11 +87,16 @@ sectionEnd
 
 section "uninstall"
     delete "$INSTDIR\psio-assist.exe"
-    delete "$INSTDIR\*.qm"
+    delete "$INSTDIR\*.dll"
     delete "$INSTDIR\README.md"
     delete "$INSTDIR\LICENSE"
     delete "$INSTDIR\uninstall.exe"
     
+    ; Remove Qt directories
+    rmDir /r "$INSTDIR\platforms"
+    rmDir /r "$INSTDIR\styles"
+    rmDir /r "$INSTDIR\imageformats"
+    rmDir /r "$INSTDIR\translations"
     rmDir "$INSTDIR"
     
     delete "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk"
