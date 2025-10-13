@@ -21,6 +21,7 @@
 #include <set>
 #include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QLibraryInfo>
 
 namespace fs = std::filesystem;
 
@@ -36,12 +37,18 @@ MainWindow::MainWindow(QWidget *parent)
       processButton(nullptr),
       statusLabel(nullptr),
       progressBar(nullptr),
-      translator(nullptr)
+      languageCombo(nullptr),
+      translator(nullptr),
+      qtTranslator(nullptr)
 {
-    // Aplicar estilo personalizado para diálogos
+    // Initialize translators
+    translator = new QTranslator(this);
+    qtTranslator = new QTranslator(this);
+    
+    // Apply custom style for dialogs
     setDialogStyle();
     
-    // Definir tamanho inicial da janela
+    // Set initial window size
     resize(800, 600);
     setMinimumSize(800, 600);
     
@@ -49,17 +56,20 @@ MainWindow::MainWindow(QWidget *parent)
     setupUI();
     setupMenus();
     
-    // Carregar configurações do banco de dados
+    // Load database settings
     loadFromDatabase();
 
-    // Restaurar última pasta usada
+    // Restore last used folder
     if (!Config::getInstance().getLastDirectory().isEmpty()) {
         loadGames(Config::getInstance().getLastDirectory());
     }
+    
+    // Load initial language
+    loadLanguage(currentLanguage);
 }
 
 MainWindow::~MainWindow() {
-    // Fechar a conexão com o banco de dados
+    // Close database connection
     QSqlDatabase db = QSqlDatabase::database();
     db.close();
     QSqlDatabase::removeDatabase(db.connectionName());
@@ -77,21 +87,28 @@ void MainWindow::setupUI() {
 
     // SD Root section
     auto *sdRootGroup = new QGroupBox("SD Root", this);
-    auto *sdRootLayout = new QHBoxLayout(sdRootGroup);  // Definido o parent diretamente aqui
+    auto *sdRootLayout = new QHBoxLayout(sdRootGroup);
     
-    selectDirButton = new QPushButton("Browse", this);
+    selectDirButton = new QPushButton(tr("Browse"), this);
     searchBox = new QLineEdit(this);
-    searchBox->setPlaceholderText("Pesquisar jogos...");
+    searchBox->setPlaceholderText(tr("Search games..."));
+    
+    // Language selection
+    languageCombo = new QComboBox(this);
+    languageCombo->addItem("Português", "pt_BR");
+    languageCombo->addItem("English", "en_US");
+    languageCombo->setCurrentText("Português");
     
     sdRootLayout->addWidget(selectDirButton);
     sdRootLayout->addWidget(searchBox, 1);
+    sdRootLayout->addWidget(languageCombo);
     
     mainLayout->addWidget(sdRootGroup);
 
     // Files section
     gameTable = new QTableWidget(this);
     gameTable->setColumnCount(5);
-    gameTable->setHorizontalHeaderLabels({"ID", "Nome", "Disco", "BIN Files", "Status"});
+    gameTable->setHorizontalHeaderLabels({tr("ID"), tr("Name"), tr("Disc"), tr("BIN Files"), tr("Status")});
     
     // Configurar larguras das colunas
     gameTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);  // ID
@@ -111,13 +128,13 @@ void MainWindow::setupUI() {
     auto *toolsGroup = new QGroupBox("Tools", this);
     auto *toolsLayout = new QGridLayout(toolsGroup);  // Definido o parent diretamente aqui
     
-    mergeBinFilesCheck = new QCheckBox("Merge Bin Files", this);
-    cu2ForAllCheck = new QCheckBox("CU2 For All", this);
-    fixInvalidNameCheck = new QCheckBox("Fix Invalid Name", this);
-    autoRenameCheck = new QCheckBox("Auto Rename", this);
-    autoRenameCheck->setEnabled(true);  // Habilitar o checkbox
-    addCoverArtCheck = new QCheckBox("Add Cover Art", this);
-    createMultiDiscCheck = new QCheckBox("Create Multi-Disc", this);
+    mergeBinFilesCheck = new QCheckBox(tr("Merge Bin Files"), this);
+    cu2ForAllCheck = new QCheckBox(tr("CU2 For All"), this);
+    fixInvalidNameCheck = new QCheckBox(tr("Fix Invalid Name"), this);
+    autoRenameCheck = new QCheckBox(tr("Auto Rename"), this);
+    autoRenameCheck->setEnabled(true);  // Enable the checkbox
+    addCoverArtCheck = new QCheckBox(tr("Add Cover Art"), this);
+    createMultiDiscCheck = new QCheckBox(tr("Create Multi-Disc"), this);
     
     toolsLayout->addWidget(mergeBinFilesCheck, 0, 0);
     toolsLayout->addWidget(cu2ForAllCheck, 1, 0);
@@ -136,8 +153,8 @@ void MainWindow::setupUI() {
     progressBar->setTextVisible(true);
     progressBar->setAlignment(Qt::AlignCenter);
     
-    statusLabel = new QLabel("Status: Ready", this);
-    processButton = new QPushButton("Process", this);
+    statusLabel = new QLabel(tr("Status: Ready"), this);
+    processButton = new QPushButton(tr("Process"), this);
     processButton->setEnabled(false);
     
     progressLayout->addWidget(progressBar);
@@ -146,35 +163,36 @@ void MainWindow::setupUI() {
     
     mainLayout->addWidget(progressGroup);
 
-    // Conectar sinais
+    // Connect signals
     connect(selectDirButton, &QPushButton::clicked, this, &MainWindow::onSelectDirectory);
     connect(searchBox, &QLineEdit::textChanged, this, &MainWindow::onSearchTextChanged);
     connect(processButton, &QPushButton::clicked, this, &MainWindow::onProcessGames);
     connect(gameTable, &QTableWidget::cellClicked, this, &MainWindow::onGameSelected);
+    connect(languageCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onLanguageChanged);
 }
 
 void MainWindow::setupMenus() {
     // File Menu
-    fileMenu = menuBar()->addMenu("&Arquivo");
-    fileMenu->addAction("Selecionar Diretório", this, &MainWindow::onSelectDirectory);
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(tr("Select Directory"), this, &MainWindow::onSelectDirectory);
     fileMenu->addSeparator();
-    fileMenu->addAction("Exportar Database", this, &MainWindow::onExportDatabase);
-    fileMenu->addAction("Importar Database", this, &MainWindow::onImportDatabase);
+    fileMenu->addAction(tr("Export Database"), this, &MainWindow::onExportDatabase);
+    fileMenu->addAction(tr("Import Database"), this, &MainWindow::onImportDatabase);
     fileMenu->addSeparator();
-    fileMenu->addAction("Sair", this, &QWidget::close);
+    fileMenu->addAction(tr("Exit"), this, &QWidget::close);
 
     // Tools Menu
-    toolsMenu = menuBar()->addMenu("&Ferramentas");
-    toolsMenu->addAction("Processar Jogos", this, &MainWindow::onProcessGames);
-    toolsMenu->addAction("Verificar Arquivos", this, &MainWindow::onVerifyFiles);
-    toolsMenu->addAction("Corrigir Arquivos CUE", this, &MainWindow::onFixCueFiles);
-    toolsMenu->addAction("Criar Backup", this, &MainWindow::onCreateBackup);
+    toolsMenu = menuBar()->addMenu(tr("&Tools"));
+    toolsMenu->addAction(tr("Process Games"), this, &MainWindow::onProcessGames);
+    toolsMenu->addAction(tr("Verify Files"), this, &MainWindow::onVerifyFiles);
+    toolsMenu->addAction(tr("Fix CUE Files"), this, &MainWindow::onFixCueFiles);
+    toolsMenu->addAction(tr("Create Backup"), this, &MainWindow::onCreateBackup);
     toolsMenu->addSeparator();
-    toolsMenu->addAction("Preferências", this, &MainWindow::onPreferences);
+    toolsMenu->addAction(tr("Preferences"), this, &MainWindow::onPreferences);
 
     // Help Menu
-    helpMenu = menuBar()->addMenu("&Ajuda");
-    helpMenu->addAction("Sobre", this, &MainWindow::onAbout);
+    helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(tr("About"), this, &MainWindow::onAbout);
 }
 
 void MainWindow::setDialogStyle()
@@ -290,7 +308,7 @@ std::string MainWindow::extractGameId(const QString& binPath) {
 
 void MainWindow::onSelectDirectory() {
     QString dir = QFileDialog::getExistingDirectory(this,
-        "Selecionar Diretório", 
+        tr("Select Directory"), 
         QString(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
@@ -304,7 +322,7 @@ void MainWindow::onSelectDirectory() {
     progressBar->setMaximum(0);
     progressBar->setValue(0);
     processButton->setEnabled(false);
-    statusLabel->setText("Escaneando diretório...");
+    statusLabel->setText(tr("Scanning directory..."));
     
     QApplication::processEvents();
 
@@ -390,7 +408,7 @@ void MainWindow::onSelectDirectory() {
     updateGameList();
     processButton->setEnabled(!games.empty());
     progressBar->setValue(0);
-    statusLabel->setText(QString("Jogos encontrados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games found: %1").arg(games.size()));
 }
 
 void MainWindow::loadGames(const QString &directory) {
@@ -443,7 +461,7 @@ void MainWindow::loadGames(const QString &directory) {
     }
 
     updateGameList();
-    statusLabel->setText(QString("Jogos encontrados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games found: %1").arg(games.size()));
 }
 
 void MainWindow::updateGameList() {
@@ -480,19 +498,19 @@ void MainWindow::updateGameList() {
         QColor bgColor = UIConfig::ERROR_COLOR;
         
         if (!game.hasCoverArt()) {
-            statusList << "Sem capa";
+            statusList << tr("No cover");
         }
         
         if (!game.hasCu2()) {
-            statusList << "Sem CU2";
+            statusList << tr("No CU2");
         }
         
-        // Verificar nome inválido (você precisa implementar esta lógica)
+        // Check invalid name
         if (!isValidGameName(game.getDirectoryName())) {
-            statusList << "Nome inválido";
+            statusList << tr("Invalid name");
         }
         
-        QString status = statusList.isEmpty() ? "OK" : statusList.join(", ");
+        QString status = statusList.isEmpty() ? tr("OK") : statusList.join(", ");
         
         if (statusList.isEmpty()) {
             bgColor = UIConfig::SUCCESS_COLOR;
@@ -505,7 +523,7 @@ void MainWindow::updateGameList() {
         gameTable->setItem(row, 4, statusItem);
     }
 
-    statusLabel->setText(QString("Jogos encontrados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games found: %1").arg(games.size()));
 }
 
 bool MainWindow::isValidGameName(const std::string& name) {
@@ -576,7 +594,7 @@ void MainWindow::onProcessGames() {
                 QStringList binFiles = gameDir.entryList({"*.bin"}, QDir::Files);
                 
                 if (binFiles.size() > 1) {
-                    statusLabel->setText("Mergeando arquivos BIN: " + 
+                    statusLabel->setText(tr("Merging BIN files: ") + 
                                       QString::fromStdString(game.getDirectoryName()));
                     mergeBinFiles(game);
                 }
@@ -584,14 +602,14 @@ void MainWindow::onProcessGames() {
             
             // 2. Cu2 For All
             if (cu2ForAllCheck->isChecked()) {
-                statusLabel->setText("Criando CU2: " + 
+                statusLabel->setText(tr("Creating CU2: ") + 
                                   QString::fromStdString(game.getDirectoryName()));
                 generateCu2File(game);
             }
             
             // 3. Fix Invalid Name
             if (fixInvalidNameCheck->isChecked()) {
-                statusLabel->setText("Corrigindo nome: " + 
+                statusLabel->setText(tr("Fixing name: ") + 
                                   QString::fromStdString(game.getDirectoryName()));
                 if (!isValidGameName(game.getDirectoryName())) {
                     fixGameName(game);
@@ -600,21 +618,21 @@ void MainWindow::onProcessGames() {
             
             // 4. Auto Rename
             if (autoRenameCheck->isChecked()) {
-                statusLabel->setText("Renomeando: " + 
+                statusLabel->setText(tr("Renaming: ") + 
                                   QString::fromStdString(game.getDirectoryName()));
                 autoRenameGame(game);
             }
             
             // 5. Create Multi-Disc
             if (createMultiDiscCheck->isChecked() && isMultiDisc(game)) {
-                statusLabel->setText("Processando multi-disco: " + 
+                statusLabel->setText(tr("Processing multi-disc: ") + 
                                   QString::fromStdString(game.getDirectoryName()));
                 processMultiDisc(game);
             }
             
             // 6. Add Cover Art
             if (addCoverArtCheck->isChecked() && !game.hasCoverArt()) {
-                statusLabel->setText("Baixando capa: " + 
+                statusLabel->setText(tr("Downloading cover: ") + 
                                   QString::fromStdString(game.getDirectoryName()));
                 
                 // Primeiro, verificar se já existe algum .bmp no diretório
@@ -686,7 +704,7 @@ void MainWindow::onProcessGames() {
     }
     
     // Atualizar interface após processamento
-    statusLabel->setText("Atualizando lista de jogos...");
+    statusLabel->setText(tr("Updating game list..."));
     updateGameList();
     progressBar->setValue(0);
     
@@ -694,12 +712,12 @@ void MainWindow::onProcessGames() {
     setUiEnabled(true);
     
     if (errors > 0) {
-        QString errorMessage = QString("Ocorreram %1 erro(s):\n\n").arg(errors) + 
+        QString errorMessage = tr("There were %1 error(s):\n\n").arg(errors) + 
                              errorList.join("\n");
-        QMessageBox::warning(this, "Erros no Processamento", errorMessage);
+        QMessageBox::warning(this, tr("Processing Errors"), errorMessage);
     }
     
-    statusLabel->setText(QString("Processamento concluído. %1 jogo(s) processado(s)")
+    statusLabel->setText(tr("Processing completed. %1 game(s) processed")
                         .arg(games.size()));
 }
 
@@ -854,15 +872,15 @@ void MainWindow::onVerifyFiles() {
 
     processButton->setEnabled(true);
     progressBar->setValue(0);
-    statusLabel->setText(QString("Jogos encontrados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games found: %1").arg(games.size()));
 
     if (errors > 0) {
-        QMessageBox::warning(this, "Resultado", 
-            QString("Verificação concluída com %1 erro(s):\n\n%2")
+        QMessageBox::warning(this, tr("Result"), 
+            tr("Verification completed with %1 error(s):\n\n%2")
                 .arg(errors)
                 .arg(errorList.join("\n")));
     } else {
-        QMessageBox::information(this, "Resultado", "Todos os arquivos estão OK!");
+        QMessageBox::information(this, tr("Result"), tr("All files are OK!"));
     }
 }
 
@@ -920,17 +938,17 @@ void MainWindow::onCreateBackup() {
 
     processButton->setEnabled(true);
     progressBar->setValue(0);
-    statusLabel->setText(QString("Jogos encontrados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games found: %1").arg(games.size()));
 
-    QMessageBox::information(this, "Resultado", 
-        QString("Backup concluído! %1 jogos processados.").arg(processed));
+    QMessageBox::information(this, tr("Result"), 
+        tr("Backup completed! %1 games processed.").arg(processed));
 }
 
 void MainWindow::onAbout() {
-    QMessageBox::about(this, "Sobre PSIO Assistant",
-        "PSIO Assistant v1.0\n\n"
-        "Uma ferramenta para gerenciar jogos de PlayStation para PSIO.\n\n"
-        "Desenvolvido com Qt 6");
+    QMessageBox::about(this, tr("About PSIO Assistant"),
+        tr("PSIO Assistant v1.0\n\n"
+        "A tool for managing PlayStation games for PSIO.\n\n"
+        "Developed with Qt 6"));
 }
 
 void MainWindow::onFixCueFiles() {
@@ -959,7 +977,7 @@ void MainWindow::onFixCueFiles() {
 
     processButton->setEnabled(true);
     progressBar->setValue(0);
-    statusLabel->setText(QString("Jogos encontrados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games found: %1").arg(games.size()));
 
     QMessageBox::information(this, "Resultado", 
         QString("%1 arquivo(s) CUE corrigido(s)").arg(fixed));
@@ -978,7 +996,7 @@ void MainWindow::saveToDatabase() {
 void MainWindow::loadFromDatabase() {
     games = db.getAllGames();
     updateGameList();
-    statusLabel->setText(QString("Jogos carregados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games loaded: %1").arg(games.size()));
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent* event) {
@@ -987,10 +1005,10 @@ void MainWindow::contextMenuEvent(QContextMenuEvent* event) {
     if (index.isValid()) {
         QMenu contextMenu(this);
         
-        QAction* processAction = contextMenu.addAction("Processar Jogo");
-        QAction* verifyAction = contextMenu.addAction("Verificar Arquivos");
-        QAction* openFolderAction = contextMenu.addAction("Abrir Pasta");
-        QAction* removeAction = contextMenu.addAction("Remover");
+        QAction* processAction = contextMenu.addAction(tr("Process Game"));
+        QAction* verifyAction = contextMenu.addAction(tr("Verify Files"));
+        QAction* openFolderAction = contextMenu.addAction(tr("Open Folder"));
+        QAction* removeAction = contextMenu.addAction(tr("Remove"));
         
         QAction* selectedAction = contextMenu.exec(event->globalPos());
         
@@ -1008,8 +1026,8 @@ void MainWindow::contextMenuEvent(QContextMenuEvent* event) {
                     QString::fromStdString(game.getDirectoryPath())));
             }
             else if (selectedAction == removeAction) {
-                if (QMessageBox::question(this, "Confirmar Remoção",
-                    "Deseja remover este jogo da lista?") == QMessageBox::Yes) {
+                if (QMessageBox::question(this, tr("Confirm Removal"),
+                    tr("Do you want to remove this game from the list?")) == QMessageBox::Yes) {
                     db.removeGame(game.getId());
                     games.erase(games.begin() + index.row());
                     updateGameList();
@@ -1038,7 +1056,7 @@ void MainWindow::processGame(const Game& game) {
     
     processButton->setEnabled(true);
     progressBar->setValue(0);
-    statusLabel->setText(QString("Jogos encontrados: %1").arg(games.size()));
+    statusLabel->setText(tr("Games found: %1").arg(games.size()));
 }
 
 void MainWindow::onPreferences() {
@@ -1537,6 +1555,94 @@ void MainWindow::setUiEnabled(bool enabled) {
     addCoverArtCheck->setEnabled(enabled);
     createMultiDiscCheck->setEnabled(enabled);
     
-    // Forçar atualização da interface
+    // Force interface update
     QApplication::processEvents();
+}
+
+void MainWindow::onLanguageChanged() {
+    QString language = languageCombo->currentData().toString();
+    loadLanguage(language);
+}
+
+void MainWindow::loadLanguage(const QString& language) {
+    if (currentLanguage == language) {
+        return;
+    }
+    
+    currentLanguage = language;
+    
+    // Remove old translators
+    qApp->removeTranslator(translator);
+    qApp->removeTranslator(qtTranslator);
+    
+    // Load new translations
+    QString translationPath = QCoreApplication::applicationDirPath() + "/translations/";
+    if (translator->load("psio-assist_" + language, translationPath)) {
+        qApp->installTranslator(translator);
+    }
+    
+    if (qtTranslator->load("qt_" + language, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+        qApp->installTranslator(qtTranslator);
+    }
+    
+    // Retranslate UI
+    retranslateUI();
+}
+
+void MainWindow::retranslateUI() {
+    // Update window title
+    setWindowTitle(tr("PSIO Assist EX"));
+    
+    // Update menu items
+    fileMenu->setTitle(tr("&File"));
+    fileMenu->actions()[0]->setText(tr("Select Directory"));
+    fileMenu->actions()[2]->setText(tr("Export Database"));
+    fileMenu->actions()[3]->setText(tr("Import Database"));
+    fileMenu->actions()[5]->setText(tr("Exit"));
+    
+    toolsMenu->setTitle(tr("&Tools"));
+    toolsMenu->actions()[0]->setText(tr("Process Games"));
+    toolsMenu->actions()[1]->setText(tr("Verify Files"));
+    toolsMenu->actions()[2]->setText(tr("Fix CUE Files"));
+    toolsMenu->actions()[3]->setText(tr("Create Backup"));
+    toolsMenu->actions()[5]->setText(tr("Preferences"));
+    
+    helpMenu->setTitle(tr("&Help"));
+    helpMenu->actions()[0]->setText(tr("About"));
+    
+    // Update UI elements
+    selectDirButton->setText(tr("Browse"));
+    searchBox->setPlaceholderText(tr("Search games..."));
+    processButton->setText(tr("Process"));
+    
+    // Update table headers
+    gameTable->setHorizontalHeaderLabels({
+        tr("ID"), tr("Name"), tr("Disc"), tr("BIN Files"), tr("Status")
+    });
+    
+    // Update group boxes
+    if (auto sdRootGroup = findChild<QGroupBox*>("SD Root")) {
+        sdRootGroup->setTitle(tr("SD Root"));
+    }
+    if (auto toolsGroup = findChild<QGroupBox*>("Tools")) {
+        toolsGroup->setTitle(tr("Tools"));
+    }
+    if (auto progressGroup = findChild<QGroupBox*>("Progress")) {
+        progressGroup->setTitle(tr("Progress"));
+    }
+    
+    // Update checkboxes
+    mergeBinFilesCheck->setText(tr("Merge Bin Files"));
+    cu2ForAllCheck->setText(tr("CU2 For All"));
+    fixInvalidNameCheck->setText(tr("Fix Invalid Name"));
+    autoRenameCheck->setText(tr("Auto Rename"));
+    addCoverArtCheck->setText(tr("Add Cover Art"));
+    createMultiDiscCheck->setText(tr("Create Multi-Disc"));
+    
+    // Update status
+    if (games.empty()) {
+        statusLabel->setText(tr("Status: Ready"));
+    } else {
+        statusLabel->setText(tr("Games found: %1").arg(games.size()));
+    }
 } 

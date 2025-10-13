@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find Qt6 packages
-find_package(Qt6 COMPONENTS Core Gui Widgets Sql Network REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Sql Network LinguistTools REQUIRED)
 
 # Add source files
 add_executable(psio-assist
@@ -39,4 +39,18 @@ target_link_libraries(psio-assist PRIVATE
     Qt6::Widgets
     Qt6::Sql
     Qt6::Network
-) 
+)
+
+# Translation files
+set(TS_FILES
+    translations/psio-assist_pt_BR.ts
+    translations/psio-assist_en_US.ts
+)
+
+# Generate translation files
+qt6_add_translations(psio-assist TS_FILES ${TS_FILES})
+
+# Install translation files
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/psio-assist_pt_BR.qm
+              ${CMAKE_CURRENT_BINARY_DIR}/psio-assist_en_US.qm
+        DESTINATION share/psio-assist/translations) 
