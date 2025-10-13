@@ -5,6 +5,13 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = psio-assist-ex
 TEMPLATE = app
 
+# Translation files
+TRANSLATIONS += translations/psio-assist_pt_BR.ts \
+                translations/psio-assist_en_US.ts
+
+# Resource file
+RESOURCES += resources.qrc
+
 SOURCES += src/main.cpp \
            src/mainwindow.cpp \
            src/database.cpp \

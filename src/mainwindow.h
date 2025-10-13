@@ -25,6 +25,8 @@
 #include <QRegularExpression>
 #include <QSqlDatabase>
 #include <QDirIterator>
+#include <QTranslator>
+#include <QComboBox>
 #include "game.h"
 #include "database.h"
 #include "utils.h"
@@ -53,6 +55,7 @@ private slots:
     void onFixCueFiles();
     void onCreateBackup();
     void onPreferences();
+    void onLanguageChanged();
 
 private:
     void setupUI();
@@ -76,6 +79,8 @@ private:
     void setUiEnabled(bool enabled);
     void setDialogStyle();
     void updateCueFileContent(const QString& cuePath, const QString& newBinName);
+    void retranslateUI();
+    void loadLanguage(const QString& language);
 
     // UI Elements
     QWidget *centralWidget;
@@ -88,6 +93,7 @@ private:
     QTableWidget *gameTable;
     QLabel *statusLabel;
     QProgressBar *progressBar;
+    QComboBox *languageCombo;
 
     // Menus
     QMenu *fileMenu;
@@ -108,10 +114,11 @@ private:
     QCheckBox *createMultiDiscCheck;
     QCheckBox *createCu2Check;
 
-    // Tradutor
+    // Translator
     QTranslator *translator;
+    QTranslator *qtTranslator;
 
-    // Idioma atual
+    // Current language
     QString currentLanguage = "pt_BR";
 };
 

@@ -27,7 +27,7 @@ Database::~Database() {
     if (db.isOpen()) {
         db.close();
     }
-    QSqlDatabase::removeDatabase(connection); // Adicione esta linha para remover a conexão
+    QSqlDatabase::removeDatabase(connection); // Add this line to remove the connection
 }
 
 bool Database::init() {
@@ -77,7 +77,7 @@ bool Database::createTables() {
         return false;
     }
 
-    // Tabela de discos da coleção
+    // Collection discs table
     if (!query.exec("CREATE TABLE IF NOT EXISTS disc_collection ("
                    "game_id TEXT,"
                    "disc_path TEXT,"
@@ -109,7 +109,7 @@ bool Database::initDatabase() {
 
     QSqlQuery query(db);
     
-    // Criar tabela de games se não existir
+    // Create games table if it does not exist
     if (!query.exec("CREATE TABLE IF NOT EXISTS games ("
                    "id TEXT PRIMARY KEY,"
                    "name TEXT,"
@@ -122,7 +122,7 @@ bool Database::initDatabase() {
         return false;
     }
 
-    // Criar tabela de covers se não existir
+    // Create covers table if it does not exist
     if (!query.exec("CREATE TABLE IF NOT EXISTS covers ("
                    "game_id TEXT PRIMARY KEY,"
                    "cover_data BLOB"
@@ -135,10 +135,10 @@ bool Database::initDatabase() {
 }
 
 QByteArray Database::downloadCoverArt(const QString& gameId) {
-    // Formatar o ID corretamente (remover pontos e substituir underscore por hífen)
+    // Format the ID correctly (remove dots and replace underscore with hyphen)
     QString formattedId = gameId;
     formattedId.remove('.');  // Remove qualquer ponto que exista
-    formattedId.replace("_", "-");  // Substitui underscore por hífen
+    formattedId.replace("_", "-");  // Replace underscore with hyphen
     
     // URL base do servidor de capas
     QString baseUrl = "https://raw.githubusercontent.com/xlenore/psx-covers/refs/heads/main/covers/default/";
@@ -208,7 +208,7 @@ QByteArray Database::getCoverArt(const QString& gameId) {
     }
     
     qDebug() << "Capa não encontrada no banco local para" << gameId << ". Tentando download...";
-    // Se não encontrou no banco, tenta baixar
+    // If not found in database, try to download
     return downloadCoverArt(gameId);
 }
 
@@ -267,7 +267,7 @@ bool Database::addGame(const Game& game) {
         return false;
     }
 
-    // Inserir coleção de discos
+    // Insert disc collection
     for (const auto& disc : game.getDiscCollection()) {
         query.prepare("INSERT INTO disc_collection (game_id, disc_path) VALUES (:game_id, :disc_path)");
         query.bindValue(":game_id", QString::fromStdString(game.getId()));
@@ -308,7 +308,7 @@ std::vector<Game> Database::getAllGames() {
     while (query.next()) {
         QString gameId = query.value("id").toString();
         
-        // Buscar coleção de discos
+        // Search for disc collection
         QSqlQuery discQuery(db);
         std::vector<std::string> discCollection;
         discQuery.prepare("SELECT disc_path FROM disc_collection WHERE game_id = :game_id");
@@ -325,7 +325,7 @@ std::vector<Game> Database::getAllGames() {
         binQuery.prepare("SELECT file_name, file_path FROM bin_files WHERE game_id = :game_id");
         binQuery.bindValue(":game_id", gameId);
         
-        CueSheet cueSheet("", "", ""); // Temporário
+        CueSheet cueSheet("", "", ""); // Temporary
         if (binQuery.exec()) {
             while (binQuery.next()) {
                 cueSheet.addBinFile(BinFile(
@@ -374,7 +374,7 @@ bool Database::updateGame(const Game& game) {
         return false;
     }
 
-    // Remover coleção de discos antiga
+    // Remove old disc collection
     query.prepare("DELETE FROM disc_collection WHERE game_id = :game_id");
     query.bindValue(":game_id", QString::fromStdString(game.getId()));
     if (!query.exec()) {
@@ -382,7 +382,7 @@ bool Database::updateGame(const Game& game) {
         return false;
     }
 
-    // Inserir nova coleção de discos
+    // Insert new disc collection
     for (const auto& disc : game.getDiscCollection()) {
         query.prepare("INSERT INTO disc_collection (game_id, disc_path) VALUES (:game_id, :disc_path)");
         query.bindValue(":game_id", QString::fromStdString(game.getId()));
@@ -458,7 +458,7 @@ Game Database::getGame(const std::string& gameId) {
         return Game("", "", "", 0, std::vector<std::string>(), CueSheet("", "", ""), false, false);
     }
 
-    // Buscar coleção de discos
+    // Search for disc collection
     QSqlQuery discQuery(db);
     std::vector<std::string> discCollection;
     discQuery.prepare("SELECT disc_path FROM disc_collection WHERE game_id = :game_id");
@@ -515,4 +515,4 @@ QString Database::getGameTitle(const QString& gameId) {
     return QString();
 }
 
-// ... outros métodos serão implementados conforme necessário ...
+// ... other methods will be implemented as needed ...

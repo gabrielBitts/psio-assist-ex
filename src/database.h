@@ -36,7 +36,7 @@ public:
     
     QString getGameTitle(const QString& gameId);
     
-    // Evitar cópia da instância singleton
+    // Prevent copying of singleton instance
     Database(const Database&) = delete;
     void operator=(const Database&) = delete;
 

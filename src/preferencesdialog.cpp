@@ -1,5 +1,5 @@
 #include "preferencesdialog.h"
-#include "config.h" // Certifique-se de incluir o cabeçalho da classe Config
+#include "config.h" // Make sure to include the Config class header
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QDialogButtonBox>
@@ -16,7 +16,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     , backupDirEdit(nullptr)
     , backupDirButton(nullptr)
 {
-    setWindowTitle("Preferências");
+    setWindowTitle(tr("Preferences"));
     setupUI();
     loadSettings();
 }
@@ -31,7 +31,7 @@ void PreferencesDialog::saveSettings() {
 
 void PreferencesDialog::selectBackupDir() {
     QString dir = QFileDialog::getExistingDirectory(this, 
-        "Selecionar Diretório de Backup",
+        tr("Select Backup Directory"),
         backupDirEdit->text());
     if (!dir.isEmpty()) {
         backupDirEdit->setText(dir);
@@ -42,25 +42,25 @@ void PreferencesDialog::setupUI() {
     auto *layout = new QVBoxLayout(this);
     auto *formLayout = new QFormLayout();
 
-    // Opções de correção automática
-    autoFixCueBox = new QCheckBox("Corrigir arquivos CUE automaticamente", this);
+    // Auto-fix options
+    autoFixCueBox = new QCheckBox(tr("Automatically fix CUE files"), this);
     formLayout->addRow(autoFixCueBox);
 
-    // Opções de backup
-    createBackupsBox = new QCheckBox("Criar backups antes de modificar arquivos", this);
+    // Backup options
+    createBackupsBox = new QCheckBox(tr("Create backups before modifying files"), this);
     formLayout->addRow(createBackupsBox);
 
-    // Diretório de backup
+    // Backup directory
     auto *backupDirLayout = new QHBoxLayout();
     backupDirEdit = new QLineEdit(this);
-    backupDirButton = new QPushButton("Selecionar", this);
+    backupDirButton = new QPushButton(tr("Select"), this);
     backupDirLayout->addWidget(backupDirEdit);
     backupDirLayout->addWidget(backupDirButton);
-    formLayout->addRow("Diretório de Backup:", backupDirLayout);
+    formLayout->addRow(tr("Backup Directory:"), backupDirLayout);
 
     layout->addLayout(formLayout);
 
-    // Botões
+    // Buttons
     auto *buttonBox = new QDialogButtonBox(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
         Qt::Horizontal, this);

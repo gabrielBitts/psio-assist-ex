@@ -2,7 +2,7 @@
 
 CueSheet::CueSheet(const std::string& fileName, const std::string& filePath, const std::string& gameName)
     : fileName(fileName), filePath(filePath), gameName(gameName) {
-    // Implementação do construtor
+    // Constructor implementation
 }
 
 std::string CueSheet::getFileName() const {

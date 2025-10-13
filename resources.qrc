@@ -2,4 +2,8 @@
 <RCC version="1.0">
     <qresource prefix="/icons">
     </qresource>
+    <qresource prefix="/translations">
+        <file>psio-assist_pt_BR.qm</file>
+        <file>psio-assist_en_US.qm</file>
+    </qresource>
 </RCC> 
