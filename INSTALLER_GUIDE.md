@@ -12,6 +12,7 @@ This guide explains how to generate a Windows `.exe` installer for your PSIO Ass
 - **Triggers**: 
   - Manual execution (workflow_dispatch)
   - When you push a tag starting with 'v' (e.g., v1.0.0)
+- **Note**: Uses latest action versions to avoid deprecation errors
 
 ### 2. NSIS Installer Script
 - **File**: `installer/psio-assist-installer.nsi`
@@ -76,6 +77,7 @@ git push origin main
    - Missing translation files (`.qm` files)
    - CMake configuration problems
    - NSIS script syntax errors
+   - Deprecated action versions (fixed in latest version)
 
 ### If the installer doesn't work:
 1. Make sure you're running it as Administrator

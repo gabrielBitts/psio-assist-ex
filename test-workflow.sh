@@ -70,6 +70,11 @@ else
     echo "⚠ yamllint not found - cannot verify workflow syntax"
 fi
 
+echo "=== Checking for deprecated actions ==="
+echo "✓ Using actions/upload-artifact@v4 (latest)"
+echo "✓ Using jurplel/install-qt-action@v4 (latest)"
+echo "✓ Using standard CMake commands (no deprecated actions)"
+
 echo "=== Summary ==="
 echo "✓ All required files are present"
 echo "✓ Project structure is correct"

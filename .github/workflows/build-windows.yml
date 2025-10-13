@@ -20,12 +20,11 @@ jobs:
         modules: 'qtbase qttools qttranslations'
         cached: 'true'
     
-    - name: Setup CMake
-      uses: lukka/run-cmake@v5
-      with:
-        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        buildDirectory: '${{ github.workspace }}/build'
-        buildType: 'Release'
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ runner.temp }}/Qt/6.5.0/mingw_64" -G "MinGW Makefiles"
     
     - name: Build Application
       run: |
