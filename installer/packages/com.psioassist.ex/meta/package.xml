@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>PSIO Assist EX</DisplayName>
+    <Description>PSIO Assist EX - A tool for managing PlayStation games for PSIO</Description>
+    <Version>1.0.0</Version>
+    <ReleaseDate>2024-01-01</ReleaseDate>
+    <Default>true</Default>
+    <Script>installscript.qs</Script>
+    <UserInterfaces>
+        <UserInterface>page.ui</UserInterface>
+    </UserInterfaces>
+    <Licenses>
+        <License name="GPL-3.0" file="LICENSE" />
+    </Licenses>
+    <Dependencies>
+        <Dependency name="Qt6" />
+    </Dependencies>
+</Package>
