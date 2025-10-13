@@ -18,29 +18,60 @@ jobs:
       with:
         version: '6.5.0'
         modules: 'qtbase qttools qttranslations'
-        cached: 'true'
+    
+    - name: Install Build Tools
+      run: |
+        # Install MinGW-w64
+        choco install mingw -y
+        # Install CMake if not already available
+        choco install cmake -y
+        # Refresh environment variables
+        refreshenv
+    
+    - name: Generate Translation Files
+      run: |
+        # Set environment variables for Qt
+        $env:CMAKE_PREFIX_PATH = "${{ runner.temp }}/Qt/6.5.0/mingw_64"
+        $env:PATH = "${{ runner.temp }}/Qt/6.5.0/mingw_64/bin;$env:PATH"
+        # Generate .qm files from .ts files
+        "${{ runner.temp }}/Qt/6.5.0/mingw_64/bin/lrelease.exe" translations/psio-assist_pt_BR.ts -qm translations/psio-assist_pt_BR.qm
+        "${{ runner.temp }}/Qt/6.5.0/mingw_64/bin/lrelease.exe" translations/psio-assist_en_US.ts -qm translations/psio-assist_en_US.qm
     
     - name: Configure CMake
       run: |
         mkdir build
         cd build
+        # Set environment variables for Qt
+        $env:CMAKE_PREFIX_PATH = "${{ runner.temp }}/Qt/6.5.0/mingw_64"
+        $env:PATH = "${{ runner.temp }}/Qt/6.5.0/mingw_64/bin;$env:PATH"
+        # Configure with CMake
         cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ runner.temp }}/Qt/6.5.0/mingw_64" -G "MinGW Makefiles"
     
     - name: Build Application
       run: |
         cd build
+        # Set environment variables for Qt
+        $env:CMAKE_PREFIX_PATH = "${{ runner.temp }}/Qt/6.5.0/mingw_64"
+        $env:PATH = "${{ runner.temp }}/Qt/6.5.0/mingw_64/bin;$env:PATH"
+        # Build the application
         cmake --build . --config Release
     
     - name: Create Windows Package
       run: |
         mkdir -p dist/PSIO-Assist-EX
+        mkdir -p dist/PSIO-Assist-EX/translations
+        
+        # Copy application files
         copy build\Release\psio-assist.exe dist\PSIO-Assist-EX\
-        copy translations\*.qm dist\PSIO-Assist-EX\translations\
         copy README.md dist\PSIO-Assist-EX\
         copy LICENSE dist\PSIO-Assist-EX\
         
+        # Copy translation files
+        copy translations\*.qm dist\PSIO-Assist-EX\translations\
+        
         # Deploy Qt dependencies
         $env:QT_DIR = "${{ runner.temp }}/Qt/6.5.0/mingw_64"
+        $env:PATH = "$env:QT_DIR/bin;$env:PATH"
         & "$env:QT_DIR/bin/windeployqt.exe" dist\PSIO-Assist-EX\psio-assist.exe
     
     - name: Download and Install NSIS

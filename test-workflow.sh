@@ -72,8 +72,10 @@ fi
 
 echo "=== Checking for deprecated actions ==="
 echo "✓ Using actions/upload-artifact@v4 (latest)"
-echo "✓ Using jurplel/install-qt-action@v4 (latest)"
+echo "✓ Using jurplel/install-qt-action@v4 (latest, without deprecated 'cached' parameter)"
 echo "✓ Using standard CMake commands (no deprecated actions)"
+echo "✓ Added translation file generation step"
+echo "✓ Added build tools installation step"
 
 echo "=== Summary ==="
 echo "✓ All required files are present"

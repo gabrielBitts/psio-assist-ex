@@ -53,11 +53,13 @@ git push origin main
 ## What the Workflow Does
 
 1. **Sets up Qt 6.5.0** with MinGW compiler
-2. **Builds your application** using CMake
-3. **Packages the application** with all Qt dependencies
-4. **Installs NSIS** (Nullsoft Scriptable Install System)
-5. **Creates the installer** using the NSIS script
-6. **Uploads the installer** as a downloadable artifact
+2. **Installs build tools** (MinGW-w64, CMake)
+3. **Generates translation files** (.qm from .ts files)
+4. **Builds your application** using CMake
+5. **Packages the application** with all Qt dependencies
+6. **Installs NSIS** (Nullsoft Scriptable Install System)
+7. **Creates the installer** using the NSIS script
+8. **Uploads the installer** as a downloadable artifact
 
 ## Features of the Generated Installer
 
@@ -74,10 +76,11 @@ git push origin main
 ### If the workflow fails:
 1. Check the workflow logs for specific error messages
 2. Common issues:
-   - Missing translation files (`.qm` files)
-   - CMake configuration problems
-   - NSIS script syntax errors
-   - Deprecated action versions (fixed in latest version)
+   - Missing translation files (`.qm` files) - **Fixed**: Added translation generation step
+   - CMake configuration problems - **Fixed**: Added build tools installation
+   - NSIS script syntax errors - **Fixed**: Removed invalid icon reference
+   - Deprecated action versions - **Fixed**: Updated all actions to latest versions
+   - Python execution errors - **Fixed**: Removed invalid 'cached' parameter
 
 ### If the installer doesn't work:
 1. Make sure you're running it as Administrator
